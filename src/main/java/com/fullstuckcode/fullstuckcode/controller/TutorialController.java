@@ -2,6 +2,7 @@ package com.fullstuckcode.fullstuckcode.controller;
 
 import com.fullstuckcode.fullstuckcode.constant.ResponseMessage;
 import com.fullstuckcode.fullstuckcode.entity.Tutorial;
+import com.fullstuckcode.fullstuckcode.model.response.PageResponse;
 import com.fullstuckcode.fullstuckcode.model.response.WebResponse;
 import com.fullstuckcode.fullstuckcode.service.TutorialService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,13 @@ public class TutorialController {
         Pageable pageable = PageRequest.of((page - 1), size, sort);
 
         Page<Tutorial> tutorials = tutorialService.getAllWithPage(pageable);
+        PageResponse<Tutorial> response = new PageResponse<>(
+                tutorials.getContent(),
+                tutorials.getTotalElements(),
+                tutorials.getTotalPages(),
+                tutorials.getNumber(),
+                tutorials.getSize()
+        );
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -55,7 +63,7 @@ public class TutorialController {
                         HttpStatus.OK.name(),
                         HttpStatus.OK.value(),
                         ResponseMessage.getResourceGetSuccess(Tutorial.class.getSimpleName()),
-                        tutorials));
+                        response));
     }
 
     @GetMapping("/{id}")
