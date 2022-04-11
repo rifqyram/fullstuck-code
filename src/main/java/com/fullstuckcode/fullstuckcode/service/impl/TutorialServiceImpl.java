@@ -4,7 +4,10 @@ import com.fullstuckcode.fullstuckcode.constant.ResponseMessage;
 import com.fullstuckcode.fullstuckcode.entity.Tutorial;
 import com.fullstuckcode.fullstuckcode.exception.NotFoundException;
 import com.fullstuckcode.fullstuckcode.repository.TutorialRepository;
+import com.fullstuckcode.fullstuckcode.service.CategoryService;
+import com.fullstuckcode.fullstuckcode.service.TagService;
 import com.fullstuckcode.fullstuckcode.service.TutorialService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,13 +19,21 @@ import javax.transaction.Transactional;
 public class TutorialServiceImpl implements TutorialService {
 
     private final TutorialRepository tutorialRepository;
+    private final TagService tagService;
+    private final CategoryService categoryService;
 
-    public TutorialServiceImpl(TutorialRepository tutorialRepository) {
+    @Autowired
+    public TutorialServiceImpl(TutorialRepository tutorialRepository, TagService tagService, CategoryService categoryService) {
         this.tutorialRepository = tutorialRepository;
+        this.tagService = tagService;
+        this.categoryService = categoryService;
     }
 
     @Override
     public Tutorial createNew(Tutorial request) {
+        request.getCategories().forEach(category -> categoryService.get(category.getId()));
+        request.getTags().forEach(tag -> tagService.get(tag.getId()));
+
         return tutorialRepository.findByTitleIgnoreCase(request.getTitle())
                 .orElseGet(() -> tutorialRepository.save(request));
     }
